@@ -1,0 +1,35 @@
+import pandas as pd
+import itertools
+
+# Defining the possible roles: 1 for Knight, 0 for Normal, -1 for Knave
+roles = [1, 0, -1]
+islanders = ['A', 'B', 'C', 'D']
+
+# Generate all possible combinations of roles for the four islanders
+combinations = list(itertools.product(roles, repeat=4))
+
+# Create DataFrame for truth table
+truth_table = pd.DataFrame(combinations, columns=islanders)
+
+# Add columns for the truth of each statement based on the rules defined
+# For A: "B is a knight or C is a knight."
+truth_table['A statement'] = truth_table.apply(lambda row: row['A'] == 1 and (row['B'] == 1 or row['C'] == 1), axis=1)
+
+# For B: "If D is a knave, then A is a knight."
+truth_table['B statement'] = truth_table.apply(lambda row: row['B'] == 1 and (row['D'] != -1 or row['A'] == 1), axis=1)
+
+# For C: "If A is a knight, then B is a knight."
+truth_table['C statement'] = truth_table.apply(lambda row: row['C'] == 1 and (row['A'] != 1 or row['B'] == 1), axis=1)
+
+# For D: "If C is a knave, then A is a knight."
+truth_table['D statement'] = truth_table.apply(lambda row: row['D'] == 1 and (row['C'] != -1 or row['A'] == 1), axis=1)
+
+# Adjusting display settings to show the full table
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
+# Filter the truth table to show only rows where there is at least one knight (1) and one knave (-1)
+filtered_truth_table = truth_table[(truth_table[['A', 'B', 'C', 'D']].eq(1).any(axis=1)) & (truth_table[['A', 'B', 'C', 'D']].eq(-1).any(axis=1))]
+
+# Show the filtered truth table
+print(filtered_truth_table)
